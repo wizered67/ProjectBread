@@ -5,7 +5,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 public class Constants {
-	public static int TILE_SIZE = 32;
+	public final static int TILE_SIZE = 32;
+	public final static boolean DEBUG = false;
 	public static boolean isRectangle(Object c){
 		return Rectangle2D.class.isAssignableFrom(c.getClass());
 	}

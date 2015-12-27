@@ -12,21 +12,28 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 public class GameScreen implements Screen {
 	 //bleh test fml
 	//640 x 480
     MyGame game; // Note it's "MyGame" not "Game"
     SpriteBatch batch;
 	OrthographicCamera camera;
+	OrthographicCamera hudCamera;
 	PlayerEntity player;
 	ShapeRenderer shapes;
 	Quadtree quad;
 	BitmapFont font;
 	ArrayList<Entity> allEntities;
+	Array<AtlasRegion> grassTiles;
+	AtlasRegion airSoloGrass;
 	int[][] staticGrid;
     // constructor to keep a reference to the main Game class
      public GameScreen(MyGame game){
@@ -40,19 +47,42 @@ public class GameScreen implements Screen {
         		staticGrid[x][y] = 0;
         	}
         }
-        staticGrid[0][0] = 1;
-        staticGrid[0][5] = 1;
-        staticGrid[6][10] = 1;
-        staticGrid[7][3] = 1;
-        staticGrid[8][5] = 1;
+        
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("Grass.pack"));
+		grassTiles = atlas.findRegions("Grass");
+		airSoloGrass = atlas.findRegion("SingleBlock_Air");
+		grassTiles.add(airSoloGrass);
+		for (AtlasRegion g : grassTiles){
+			g.flip(false, true);
+		}
+        staticGrid[0][0] = 4;
+        staticGrid[0][5] = 4;
+        staticGrid[6][10] = 4;
+        staticGrid[7][3] = 4;
+        staticGrid[5][4] = 4;
+        staticGrid[3][3] = 4;
+        staticGrid[8][5] = 4;
+        for (int x = 0; x < 19; x++){
+        	staticGrid[x][7] = MathUtils.random(1, 3);
+        }
+        for (int y = 0; y < 15; y++){
+        	staticGrid[19][y] = MathUtils.random(1, 3);
+        }
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.
 		          getHeight());
 		camera.setToOrtho(true);
+		camera.zoom = 0.5f;
+		
+		hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.
+		          getHeight());
+		hudCamera.setToOrtho(true);
+		hudCamera.zoom = 1;
+		
 		shapes = new ShapeRenderer();
 		quad = new Quadtree(0, new Rectangle(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
 		
 		allEntities = new ArrayList<Entity>();
-		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 16, 16), new Vector2(100, 300)));
+		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 16, 16), new Vector2(400, 190)));
 		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 100, 200), new Vector2(400, 120)));
 		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 50, 200), new Vector2(500, 300)));
 		player = new PlayerEntity("Player 1", this);
@@ -62,7 +92,7 @@ public class GameScreen implements Screen {
 			//System.out.println(i);
 			//allEntities.add(new TestEntity());
 			int testSize = 32;
-			allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, MathUtils.random(testSize, testSize), MathUtils.random(testSize, testSize)), new Vector2(MathUtils.random(0, Gdx.graphics.getWidth()), MathUtils.random(0, Gdx.graphics.getHeight()))));
+			//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, MathUtils.random(testSize, testSize), MathUtils.random(testSize, testSize)), new Vector2(MathUtils.random(0, Gdx.graphics.getWidth()), MathUtils.random(0, Gdx.graphics.getHeight()))));
 		}
 		
      }
@@ -72,48 +102,67 @@ public class GameScreen implements Screen {
         // update and draw stuff
     	Gdx.gl.glClearColor(1, 1, 1, 1);
   		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-    	camera.update();
+    	camera.position.set(player.getX() + player.getWidth() / 2, (float) player.getLowerY() - 40, 0);
+  		camera.update();
+  		//System.out.println(camera.position);
         batch.setProjectionMatrix(camera.combined);
+        
+        shapes.setProjectionMatrix(hudCamera.combined);
+        shapes.setColor(Color.CYAN);
+        shapes.begin(ShapeType.Filled);
+        shapes.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+       
+        shapes.end();
         shapes.setProjectionMatrix(camera.combined); 
         
-       
-        shapes.begin(ShapeType.Line);
-        shapes.setColor(Color.RED);
-    	for (int x = 0; x < Gdx.graphics.getWidth(); x += Constants.TILE_SIZE){
-    		shapes.line(x, 0, x, Gdx.graphics.getHeight());
-    	}
-    	for (int y = 0; y < Gdx.graphics.getHeight(); y += Constants.TILE_SIZE){
-    		shapes.line(0, y, Gdx.graphics.getWidth(), y);
-    	}
-        	
-        shapes.end();
-         
-        shapes.begin(ShapeType.Filled);
-        shapes.setColor(Color.CYAN);
-        for (Entity entity : allEntities){
-    		if (entity != null){
-    			for (BoundingShape b : entity.getBoundingShapes()){
-    				Rectangle2D bounds = b.getShape().getBounds2D();
-    				shapes.rect((float)bounds.getX() + entity.getX(), (float)bounds.getY() + entity.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-    			}
-    		}
-    	}
-    	
-        shapes.setColor(Color.GREEN);
+        if (Constants.DEBUG){
+	        shapes.begin(ShapeType.Line);
+	        shapes.setColor(Color.RED);
+	    	for (int x = 0; x < Gdx.graphics.getWidth(); x += Constants.TILE_SIZE){
+	    		shapes.line(x, 0, x, Gdx.graphics.getHeight());
+	    	}
+	    	for (int y = 0; y < Gdx.graphics.getHeight(); y += Constants.TILE_SIZE){
+	    		shapes.line(0, y, Gdx.graphics.getWidth(), y);
+	    	}
+	        	
+	        shapes.end();
+        }
+        
+        if (Constants.DEBUG){ 
+	        shapes.begin(ShapeType.Filled);
+	        shapes.setColor(Color.MAROON);
+	        for (Entity entity : allEntities){
+	    		if (entity != null && (entity.getClass() != PlayerEntity.class || true)){
+	    			for (BoundingShape b : entity.getBoundingShapes()){
+	    				Rectangle2D bounds = b.getShape().getBounds2D();
+	    				shapes.rect((float)bounds.getX() + entity.getX(), (float)bounds.getY() + entity.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+	    			}
+	    		}
+	    	}
+	    	shapes.end();
+        }
+        
+        batch.begin();
+        //shapes.setColor(Color.GREEN);
     	for (int x = 0; x < staticGrid.length; x++){
         	for (int y = 0; y < staticGrid[0].length; y++){
-        		if (staticGrid[x][y] == 1)
-        			shapes.rect(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+        		if (staticGrid[x][y] == 1 || staticGrid[x][y] == 2 || staticGrid[x][y] == 3 || staticGrid[x][y] == 4)
+        			batch.draw(grassTiles.get(staticGrid[x][y] - 1), x * Constants.TILE_SIZE, y * Constants.TILE_SIZE);
+        			//shapes.rect(x * Constants.TILE_SIZE, y * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
         	}
         }
-        shapes.end();
+        batch.end();
         
         batch.begin();
         
         for (Entity entity : allEntities){
         	if (entity != null){
         		if (entity.getSprite() != null){
-        			batch.draw(entity.getSprite(), entity.getX(), entity.getY());
+        			if (entity.getClass() == PlayerEntity.class){
+        				batch.draw(entity.getSprite(), entity.getX(), (float) (entity.getY() + ((PlayerEntity)entity).getPrimaryHitbox().getShape().getBounds().getY() + ((PlayerEntity)entity).getPrimaryHitbox().getShape().getBounds().getHeight()- ((PlayerEntity) entity).getHeight()));
+        			}
+        			else
+        				batch.draw(entity.getSprite(), entity.getX(), entity.getY());
         		}
         	}
         }
@@ -124,12 +173,22 @@ public class GameScreen implements Screen {
         	
                          
         batch.end();
-        
-        batch.begin();
-        font.draw(batch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 50, 50);
-        font.draw(batch, "Mouse X: " + Gdx.input.getX(), 50, 80);
-        font.draw(batch, "Mouse Y: " + Gdx.input.getY(), 50, 110);
-        batch.end();
+        if (Constants.DEBUG){
+	        batch.setProjectionMatrix(hudCamera.combined);
+	        batch.begin();
+	        
+	        font.draw(batch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 50, 50);
+	        font.draw(batch, "Mouse X: " + Gdx.input.getX(), 50, 80);
+	        font.draw(batch, "Mouse Y: " + Gdx.input.getY(), 50, 110);
+	        font.draw(batch, "On Ground: " + player.onGround(), 50, 140);
+	        font.draw(batch, "PX: " + player.getX(), 50, 170);
+	        font.draw(batch, "Camera Y: " + camera.position.y, 50, 200);
+	        double testY = player.getY() + player.getPrimaryHitbox().getShape().getBounds().getY() + player.getPrimaryHitbox().getShape().getBounds().getHeight();
+	        font.draw(batch, "Player Lower Y: " + testY, 50, 230);
+	        font.draw(batch, "Projected Mouse Y: " + camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0)).y, 50, 250);
+	        batch.end();
+	        batch.setProjectionMatrix(camera.combined);
+        }
         //debugRenderer.render(world, debugMatrix);
         for (Entity entity : allEntities){
         	if (entity != null){

@@ -1,0 +1,33 @@
+
+Grass.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Grass
+  rotate: false
+  xy: 1, 1
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 1
+Grass
+  rotate: false
+  xy: 35, 1
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+Grass
+  rotate: false
+  xy: 69, 1
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+SingleBlock_Air
+  rotate: false
+  xy: 103, 1
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
