@@ -1,6 +1,6 @@
 package com.mygdx.game;
 
-import java.awt.geom.Rectangle2D;
+
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -34,7 +35,7 @@ public class TestEntity implements Entity{
 		acceleration = new Vector2(0, 0);
      	
      	
-     	BoundingShape mainBody = new BoundingShape(this, new Rectangle2D.Float(0, 0, getWidth(), getHeight()));
+     	BoundingShape mainBody = new BoundingShape(this, new Rectangle(0, 0, getWidth(), getHeight()));
      	mainBody.setUserData("Test Object");
      	//BoundingShape foot = new BoundingShape(this, new Rectangle2D.Float(2, getHeight() - 4, getWidth() - 2, 4));
      	//foot.setSensor(true);

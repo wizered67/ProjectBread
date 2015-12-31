@@ -1,21 +1,18 @@
 package com.mygdx.game;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
+
 
 import com.badlogic.gdx.math.Vector2;
-
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Shape2D;
 
 public class BoundingShape {
 	private Object userData;
-	private Shape shape;
-	private Shape positionalShape = null;
+	private Shape2D shape;
+	private Shape2D positionalShape = null;
 	private Vector2 currentPosition = new Vector2();
 	private Entity owner;
 	private boolean sensor = false;
-	public BoundingShape(Entity creator, Shape s){
+	public BoundingShape(Entity creator, Shape2D s){
 		owner = creator;
 		shape = s;
 		positionalShape = s;
@@ -29,22 +26,22 @@ public class BoundingShape {
 		userData = data;
 	}
 	
-	public Shape getShape(){
-		return shape;
+	public Rectangle getShape(){
+		return (Rectangle) shape;
 	}
 	
-	public Shape getPositionalShape(){
-		return positionalShape;
+	public Rectangle getPositionalShape(){
+		return (Rectangle) positionalShape;
 	}
 	
 	public void setPosition(Vector2 position){
 		if (currentPosition.equals(position))
 			return;
 		if(Constants.isRectangle(shape)){
-			Rectangle2D.Float oldShape = (Rectangle2D.Float) shape;
+			Rectangle oldShape = (Rectangle) shape;
 			float newX = (float) (position.x + oldShape.getX());
 			float newY = (float) (position.y + oldShape.getY());
-			positionalShape = new Rectangle2D.Float(newX, newY, (float)oldShape.getWidth(),(float) oldShape.getHeight());
+			positionalShape = new Rectangle(newX, newY, (float)oldShape.getWidth(),(float) oldShape.getHeight());
 		}
 	}
 	
@@ -54,7 +51,7 @@ public class BoundingShape {
 	
 	public boolean intersects(BoundingShape other){
 		if (Constants.isRectangle(other.getPositionalShape()) && Constants.isRectangle(positionalShape))
-			return ((Rectangle2D) other.getPositionalShape()).intersects((Rectangle2D)positionalShape);
+			return ((Rectangle) other.getPositionalShape()).overlaps((Rectangle)positionalShape);
 		/*
 		if (Constants.isEllipse(other.getPositionalShape()) && Constants.isRectangle(positionalShape)){
 			Rectangle2D tr = (Rectangle2D) positionalShape;

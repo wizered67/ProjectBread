@@ -1,8 +1,9 @@
 package com.mygdx.game;
 
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
+
 import java.util.ArrayList;
+
+import com.badlogic.gdx.math.Rectangle;
 
 
 //http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374
@@ -65,7 +66,7 @@ public class Quadtree {
 		for (int i = 0; i < 4; i++){
 			allIndexes[i] = false;
 		}
-		Rectangle2D.Float pRect = (Rectangle2D.Float) boundingShape.getShape();
+		Rectangle pRect = (Rectangle) boundingShape.getShape();
 		int index = -1;
 		double verticalMidpoint = bounds.getX() + (bounds.getWidth() / 2);
 		double horizontalMidpoint = bounds.getY() + (bounds.getHeight() / 2);

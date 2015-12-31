@@ -1,6 +1,6 @@
 package com.mygdx.game;
 
-import java.awt.geom.Rectangle2D;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -71,15 +71,15 @@ public class PlayerEntity implements Entity{
 			setAnimation("idle");
 			sprite = currentAnimation.getKeyFrame(animTimer, true);
 			System.out.println(sprite.getRegionHeight());
-			BoundingShape pbs = new BoundingShape(this, new Rectangle2D.Float(4, 2, getWidth() - 8, getHeight() - 4));
+			BoundingShape pbs = new BoundingShape(this, new Rectangle(4, 2, getWidth() - 8, getHeight() - 4));
 			pbs.setUserData("player_body");
 			primaryHitbox.put(key, pbs);
-	     	BoundingShape fbs = new BoundingShape(this, new Rectangle2D.Float(4, getHeight() - 4, getWidth() - 8, 5) );
+	     	BoundingShape fbs = new BoundingShape(this, new Rectangle(4, getHeight() - 4, getWidth() - 8, 5) );
 	     	fbs.setSensor(true);
 	     	fbs.setUserData("player_foot");
 	     	footHitbox.put(key, fbs);
 	     	
-	     	BoundingShape hbs = new BoundingShape(this, new Rectangle2D.Float(4, 1, getWidth() - 8, 1) );
+	     	BoundingShape hbs = new BoundingShape(this, new Rectangle(4, 1, getWidth() - 8, 1) );
 	     	hbs.setSensor(true);
 	     	hbs.setUserData("player_head");
 	     	head.put(key, hbs);
@@ -98,7 +98,7 @@ public class PlayerEntity implements Entity{
         }
 		position = randomPos;
 		*/
-		position = new Vector2(MathUtils.floor(Gdx.graphics.getWidth() / 2 - getWidth()/2),64);
+		position = new Vector2(320,64);
 		velocity = new Vector2(0, 0);
 		acceleration = new Vector2(0, 0);
 		setAnimation("idle");
@@ -157,7 +157,7 @@ public class PlayerEntity implements Entity{
 			for (HashMap<String, BoundingShape> con : allBoundingShapes){
 				boundingShapes.add(con.get(anim));
 				if (oldbs != null){
-				double diffY = boundingShapes.get(0).getShape().getBounds().getHeight() - oldbs.getShape().getBounds().getHeight();
+				double diffY = boundingShapes.get(0).getShape().getHeight() - oldbs.getShape().getHeight();
 				//position.add(new Vector2(0, (float) -Math.abs(diffY) + 1));
 				}
 			}
@@ -180,7 +180,7 @@ public class PlayerEntity implements Entity{
 		//world.getQuad().printAll(0);
 		for (String key : animations.keySet()){
 			for (HashMap<String, BoundingShape> con : allBoundingShapes){
-				System.out.println(con.get(key).getShape().getBounds().getHeight());
+				System.out.println(con.get(key).getShape().getHeight());
 			}
 		}
 	}
@@ -192,6 +192,7 @@ public class PlayerEntity implements Entity{
 		boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
 		boolean justUp = Gdx.input.isKeyJustPressed(Input.Keys.UP);
 		boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+		
 		/*
 		velocity.set(new Vector2(
 				(right) ? 8 : 0 + ((left) ? -8 : 0), 
@@ -284,7 +285,7 @@ public class PlayerEntity implements Entity{
 		//else
 		//	testPosition.x = MathUtils.floor(testPosition.x);
 		hitbox.setPosition(new Vector2(testPosition.x, testPosition.y));
-		Rectangle2D.Float hitRect = (Rectangle2D.Float) hitbox.getPositionalShape();
+		Rectangle hitRect = (Rectangle) hitbox.getPositionalShape();
 		int startTile;
 		int endTile;
 		int ix = -1, iy = -1;
@@ -477,7 +478,7 @@ public class PlayerEntity implements Entity{
 	}
 	
 	public double getLowerY(){
-		return (getY() + getPrimaryHitbox().getShape().getBounds().getY() + getPrimaryHitbox().getShape().getBounds().getHeight()); 
+		return (getY() + getPrimaryHitbox().getShape().getY() + getPrimaryHitbox().getShape().getHeight()); 
 	}
 	
 	public TextureRegion getSprite(){

@@ -1,16 +1,20 @@
 package com.mygdx.game;
 
-import java.awt.Rectangle;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
+
+
+import com.badlogic.gdx.math.Ellipse;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Constants {
 	public final static int TILE_SIZE = 32;
 	public final static boolean DEBUG = false;
 	public static boolean isRectangle(Object c){
-		return Rectangle2D.class.isAssignableFrom(c.getClass());
+		return c.getClass().equals(Rectangle.class);
 	}
+	/*
 	public static boolean isEllipse(Object c){
-		return Ellipse2D.class.isAssignableFrom(c.getClass());
+		return ((Class)(Ellipse.class)).isAssignableFrom(c.getClass());
 	}
+	*/
+	
 }

@@ -1,7 +1,6 @@
 package com.mygdx.game;
 
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
+
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -17,9 +16,11 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+
 public class GameScreen implements Screen {
 	 //bleh test fml
 	//640 x 480
@@ -71,7 +72,7 @@ public class GameScreen implements Screen {
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.
 		          getHeight());
 		camera.setToOrtho(true);
-		camera.zoom = 0.5f;
+		camera.zoom = .75f;
 		
 		hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.
 		          getHeight());
@@ -82,7 +83,7 @@ public class GameScreen implements Screen {
 		quad = new Quadtree(0, new Rectangle(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
 		
 		allEntities = new ArrayList<Entity>();
-		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 16, 16), new Vector2(400, 190)));
+		//allEntities.add(new StaticEntity("Ground", new Rectangle(0, 0, 16, 16), new Vector2(400, 190)));
 		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 100, 200), new Vector2(400, 120)));
 		//allEntities.add(new StaticEntity("Ground", new Rectangle2D.Float(0, 0, 50, 200), new Vector2(500, 300)));
 		player = new PlayerEntity("Player 1", this);
@@ -134,7 +135,7 @@ public class GameScreen implements Screen {
 	        for (Entity entity : allEntities){
 	    		if (entity != null && (entity.getClass() != PlayerEntity.class || true)){
 	    			for (BoundingShape b : entity.getBoundingShapes()){
-	    				Rectangle2D bounds = b.getShape().getBounds2D();
+	    				Rectangle bounds = (Rectangle) b.getShape();
 	    				shapes.rect((float)bounds.getX() + entity.getX(), (float)bounds.getY() + entity.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
 	    			}
 	    		}
@@ -159,7 +160,7 @@ public class GameScreen implements Screen {
         	if (entity != null){
         		if (entity.getSprite() != null){
         			if (entity.getClass() == PlayerEntity.class){
-        				batch.draw(entity.getSprite(), entity.getX(), (float) (entity.getY() + ((PlayerEntity)entity).getPrimaryHitbox().getShape().getBounds().getY() + ((PlayerEntity)entity).getPrimaryHitbox().getShape().getBounds().getHeight()- ((PlayerEntity) entity).getHeight()));
+        				batch.draw(entity.getSprite(), entity.getX(), (float) (((PlayerEntity)entity).getLowerY() - ((PlayerEntity) entity).getHeight()));
         			}
         			else
         				batch.draw(entity.getSprite(), entity.getX(), entity.getY());
@@ -183,7 +184,7 @@ public class GameScreen implements Screen {
 	        font.draw(batch, "On Ground: " + player.onGround(), 50, 140);
 	        font.draw(batch, "PX: " + player.getX(), 50, 170);
 	        font.draw(batch, "Camera Y: " + camera.position.y, 50, 200);
-	        double testY = player.getY() + player.getPrimaryHitbox().getShape().getBounds().getY() + player.getPrimaryHitbox().getShape().getBounds().getHeight();
+	        double testY = player.getY() + player.getLowerY();
 	        font.draw(batch, "Player Lower Y: " + testY, 50, 230);
 	        font.draw(batch, "Projected Mouse Y: " + camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0)).y, 50, 250);
 	        batch.end();

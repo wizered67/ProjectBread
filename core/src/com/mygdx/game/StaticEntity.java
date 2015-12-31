@@ -1,17 +1,18 @@
 package com.mygdx.game;
 
-import java.awt.geom.Rectangle2D;
+
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class StaticEntity implements Entity {
 	private ArrayList<BoundingShape> boundingShapes;
 	private Vector2 position;
-	public StaticEntity(Object userData, Rectangle2D.Float rect, Vector2 position){
+	public StaticEntity(Object userData, Rectangle rect, Vector2 position){
 		boundingShapes = new ArrayList<BoundingShape>();
-		rect.setRect(0, 0, rect.getWidth(), rect.getHeight());
+		rect.set(0, 0, rect.getWidth(), rect.getHeight());
 		BoundingShape collision = new BoundingShape(this, rect);
 		collision.setUserData(userData);
 		boundingShapes.add(collision);
