@@ -3,30 +3,156 @@ Grass.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Grass
+AirSingleBlock
   rotate: false
-  xy: 1, 1
+  xy: 2, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_CornerLeft
+  rotate: false
+  xy: 2, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_CornerRight
+  rotate: false
+  xy: 36, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_Filler
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_GroundShade
+  rotate: false
+  xy: 36, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_Groundshade_LeftEdge
+  rotate: false
+  xy: 70, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_GroundShade_Right Edge
+  rotate: false
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_LeftEdge
+  rotate: false
+  xy: 70, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Dirt_RightEdge
+  rotate: false
+  xy: 104, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Grass_Air
+  rotate: false
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
-Grass
+Grass_Air
   rotate: false
-  xy: 35, 1
+  xy: 104, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
-Grass
+Grass_Air
   rotate: false
-  xy: 69, 1
+  xy: 138, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
-SingleBlock_Air
+Grass_Ground
   rotate: false
-  xy: 103, 1
+  xy: 104, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 1
+Grass_Ground
+  rotate: false
+  xy: 138, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+Grass_Ground
+  rotate: false
+  xy: 172, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+Ground_Black
+  rotate: false
+  xy: 138, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Left_Air_Corner
+  rotate: false
+  xy: 172, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Left_Ground_Corner
+  rotate: false
+  xy: 206, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Right_Air_Corner
+  rotate: false
+  xy: 172, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Right_Ground_Corner
+  rotate: false
+  xy: 206, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+Singleblock_Ground
+  rotate: false
+  xy: 240, 70
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+SingleBlock_Groundshade
+  rotate: false
+  xy: 206, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
