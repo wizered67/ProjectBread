@@ -21,4 +21,8 @@ public class ContactData {
 	public Fixture getOther(){
 		return otherFixture;
 	}
+	
+	public Contact getContact(){
+		return contact;
+	}
 }

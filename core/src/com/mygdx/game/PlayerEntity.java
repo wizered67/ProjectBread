@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -14,8 +15,10 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 
@@ -36,8 +39,13 @@ public class PlayerEntity implements Entity{
 	private int jumpTimer = 0;
 	private int jumpDelay = 5;
 	private float jumpImpulse = 12;
-	public float defaultFriction = 0.0f;
-	
+	public float defaultFriction = 0f;
+	private Vector2 drawOffset = new Vector2(0, -1f);
+	private HashMap<Integer, InputInfo> inputs;
+	private int depth = 50;
+	public Vector2 platformVelocity = new Vector2(0, 0);
+	public MovingPlatform platform;
+	private boolean walking = false;
 	public PlayerEntity(String id, GameScreen screen){
 		this.id = id;
 		this.screen = screen;
@@ -55,6 +63,7 @@ public class PlayerEntity implements Entity{
 		animations.put(Animations.FALL, airDownAnim);
 		animations.put(Animations.IDLE, idleAnim);
 		setAnimation(Animations.IDLE);
+		inputs = new HashMap<Integer, InputInfo>();
 		sprite = currentAnimation.getKeyFrame(animTimer, true);
 		//Texture tex = new Texture("batman.png");
 		//sprite = new TextureRegion(tex);
@@ -74,6 +83,7 @@ public class PlayerEntity implements Entity{
 		bodyDef.fixedRotation = true;
 		body = WorldManager.world.createBody(bodyDef);
 		body.setUserData(this);
+		body.setBullet(true);
 		PolygonShape rect = new PolygonShape();
 		float rectWidthHalf = Constants.toMeters((getWidth() - 9) / 2);
 		float rectHeightHalf = Constants.toMeters((getHeight() - 4) / 2);
@@ -88,7 +98,7 @@ public class PlayerEntity implements Entity{
 		boundingWidth = rectWidthHalf * 2;
 		boundingHeight = rectHeightHalf * 2;
 	    mainBody = body.createFixture(mb);
-		mainBody.setUserData(Fixtures.BODY);
+		mainBody.setUserData(new FixtureData(Fixtures.BODY));
 		/*
 		//- Constants.toMeters(0.5f)
 		//rect.setAsBox(Constants.toMeters(0.5f), rectHeightHalf, new Vector2(-rectWidthHalf - Constants.toMeters(0.5f), 0), 0);
@@ -154,7 +164,7 @@ public class PlayerEntity implements Entity{
 		foot.filter.categoryBits = Constants.CATEGORY_PLAYER;
 		foot.filter.maskBits = Constants.MASK_PLAYER;
 		Fixture footFixture = body.createFixture(foot);
-		footFixture.setUserData(Fixtures.FOOT);
+		footFixture.setUserData(new FixtureData(Fixtures.FOOT));
 		
 		circ.dispose();
 		rect.dispose();
@@ -203,11 +213,11 @@ public class PlayerEntity implements Entity{
 	}
 	
 	public void updateAnimation(float delta){
-		
-		if (onGround() && Math.abs(getVelocity().x) > 1e-5){
+		//System.out.println(getVelocity());
+		if (onGround() && Math.abs(getVelocity().y - platformVelocity.y) < 1e-5 && walking) { //Math.abs(getVelocity().x) > 1e-5){
 			setAnimation(Animations.WALK);
 		}
-		else if (onGround()){
+		else if (onGround() ){ //&& Math.abs(getVelocity().y - platformVelocity.y) < 1e-5
 			setAnimation(Animations.IDLE);
 		}
 		else{
@@ -220,7 +230,7 @@ public class PlayerEntity implements Entity{
 		}
 		
 		animTimer += delta;
-		if (animationType == Animations.WALK && getVelocity().x == 0){
+		if (animationType == Animations.WALK && !walking){
 			animTimer = 0;
 		}
 		
@@ -248,63 +258,109 @@ public class PlayerEntity implements Entity{
 		return animationType;
 	}
 	
-	public void updatePhysics(float delta){
-		boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-		boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
-		boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
-		boolean justUp = Gdx.input.isKeyJustPressed(Input.Keys.UP);
-		boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+	public boolean getInput(int key, boolean justPressed){
+		if (!inputs.containsKey(key)){
+			return false;
+		}
 		
-		if (right){
+		if (inputs.get(key) == null){
+			return false;
+		}
+		
+		if (!justPressed && inputs.get(key).touched){
+			return true;
+		}
+		
+		if (justPressed && inputs.get(key).justTouched){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public void updatePhysics(float delta){
+		boolean right = getInput(Input.Keys.RIGHT, false);
+		boolean left = getInput(Input.Keys.LEFT, false);
+		boolean up = getInput(Input.Keys.UP, false);
+		boolean justUp = getInput(Input.Keys.UP, true);
+		boolean down = getInput(Input.Keys.DOWN, false);
+		walking = false;
+		
+		
+		if (right && !left){
 			direction = 1;
 			if (getVelocity().x < 0){
 				body.setLinearVelocity(0.0f, getVelocity().y);
 			}
 			body.applyLinearImpulse(walkSpeed * body.getMass(), 0, getX(), getY(), true);
+			walking = true;
 		}
-		if (left){
+		if (left && !right){
 			direction = -1;
 			if (getVelocity().x > 0){
 				body.setLinearVelocity(0.0f, getVelocity().y);
 			}
 			body.applyLinearImpulse(-walkSpeed * body.getMass(), 0, getX(), getY(), true);
+			walking = true;
 		}
 		/*
 		if (!right && !left && !onGround() && getVelocity().y > 0 && Math.abs(getVelocity().x) > 1.5){
 			body.setLinearVelocity(getVelocity().x * 0.98f, getVelocity().y);
 		}
 		*/
+		
 		if ((!right && !left) || (right && left)){
 			body.setLinearVelocity(0.0f, getVelocity().y);
+			//if (Math.abs(getVelocity().y - platformVelocity.y) < 1e-5){
+				body.setLinearVelocity(getVelocity().x + platformVelocity.x, getVelocity().y); //apply x platform velocity
+			//}
+			walking = false;
 		}
+		
 		if (Math.abs(getVelocity().x) > Constants.MAX_VELOCITY){
 			body.setLinearVelocity(Constants.MAX_VELOCITY * Math.signum(getVelocity().x), getVelocity().y);
 		}
 		
-		if (justUp && onGround() && jumpTimer <= 0){
+		if (justUp && onGround() && Math.abs(body.getLinearVelocity().y - platformVelocity.y) < 1e-3 && jumpTimer <= 0){
 			jumpTimer = jumpDelay;
 			body.applyLinearImpulse(0, jumpImpulse * body.getMass(), body.getLocalCenter().x, body.getLocalCenter().x, true);
 		}
-		else if (!up){
+		else if (!up && !onGround()){
 			if (getVelocity().y > 5){
 				body.setLinearVelocity(getVelocity().x, 5);
 			}
 		}
+		else if (onGround() && platformVelocity.y != 0 && jumpTimer <= 0){
+			if (Math.abs(body.getLinearVelocity().y) < Math.abs(platformVelocity.y) && Math.signum(body.getLinearVelocity().y) == Math.signum(platformVelocity.y)){
+				body.setLinearVelocity(getVelocity().x, platformVelocity.y);
+			}
+			if (Math.signum(body.getLinearVelocity().y) != Math.signum(platformVelocity.y) && Math.abs(body.getLinearVelocity().y) <= Math.abs(platformVelocity.y)){
+				body.setLinearVelocity(getVelocity().x, platformVelocity.y);
+			}
+		}
+		
+		
 	}
 		
 	public void beginContact(ContactData c){
-		if (c.getThis().getUserData() == Fixtures.FOOT){
-			//if (c.getOther().getUserData() == Fixtures.GROUND){
-				addGroundContacts(1);
-			//}
+		Object thisData = c.getThis().getUserData();
+		if (thisData instanceof FixtureData){
+			if (((FixtureData)thisData).getType() == Fixtures.FOOT){
+				//if (c.getOther().getUserData() == Fixtures.GROUND){
+					addGroundContacts(1);
+				//}
+			}
 		}
 	}
 	
 	public void endContact(ContactData c){
-		if (c.getThis().getUserData() == Fixtures.FOOT){
-			//if (c.getOther().getUserData() == Fixtures.GROUND){
-				addGroundContacts(-1);
-			//}
+		Object thisData = c.getThis().getUserData();
+		if (thisData instanceof FixtureData){
+			if (((FixtureData)thisData).getType() == Fixtures.FOOT){
+				//if (c.getOther().getUserData() == Fixtures.GROUND){
+					addGroundContacts(-1);
+				//}
+			}
 		}
 	}
 	
@@ -361,10 +417,61 @@ public class PlayerEntity implements Entity{
 	}
 	*/
 	public TextureRegion getSprite(){
+		//sprite.getTexture().setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
 		return sprite;
 	}
 	
 	public String getId(){
 		return id;
+	}
+	
+	public void setInput(int index, InputInfo result){
+		inputs.put(index, result);
+	}
+	
+	public InputInfo getInput(Input index){
+		return inputs.get(index);
+	}
+
+	@Override
+	public void preSolveCollision(ContactData c, Manifold m) {
+		
+	}
+
+	@Override
+	public void postSolveCollision(ContactData c, ContactImpulse impulse) {
+		
+	}
+
+	@Override
+	public Vector2 getDrawOffset() {
+		return drawOffset;
+	}
+
+	@Override
+	public int getDepth() {
+		return depth;
+	}
+
+	@Override
+	public boolean equals(Entity e) {
+		// TODO Auto-generated method stub
+		return e == this;
+	}
+
+	@Override
+	public Body getBody() {
+		// TODO Auto-generated method stub
+		return body;
+	}
+
+	@Override
+	public void setPlatformVelocity(Vector2 v) {
+		platformVelocity = v;
+	}
+
+	@Override
+	public void setPlatform(MovingPlatform e) {
+		platform = e;
 	}
 }

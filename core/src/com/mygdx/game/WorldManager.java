@@ -8,6 +8,6 @@ public class WorldManager {
 	public static void init(){
 		World.setVelocityThreshold(0.1f);
 		world = new World(new Vector2(0, -22), true); 
-		world.setContactListener(new ListenerClass());
+		world.setContactListener(new MyCollisionListener());
 	}
 }
