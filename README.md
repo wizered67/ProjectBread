@@ -11,6 +11,8 @@ ProjectBread is a simple platformer game developed with [LibGDX] (https://libgdx
 * Platforms that move horizontally, vertically, and diagonally and carry the player with them.
 
 ![gameplay](https://dl.dropboxusercontent.com/u/25507891/projectbread.gif)
+
+Most of the relevant game code can be seen [here] (https://github.com/wizered67/ProjectBread/tree/master/core/src/com/mygdx/game).
 ##Credits
 Adam Victor - programming and design
  
