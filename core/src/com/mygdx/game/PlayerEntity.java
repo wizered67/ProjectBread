@@ -21,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class PlayerEntity implements Entity{
 	private String id;
@@ -46,6 +47,8 @@ public class PlayerEntity implements Entity{
 	public Vector2 platformVelocity = new Vector2(0, 0);
 	public MovingPlatform platform;
 	private boolean walking = false;
+	private boolean destroyed = false;
+	long startTime = 0;
 	public PlayerEntity(String id, GameScreen screen){
 		this.id = id;
 		this.screen = screen;
@@ -206,6 +209,12 @@ public class PlayerEntity implements Entity{
 		updatePhysics(delta);
 		updateAnimation(delta);
 		updateTimers();
+		/*
+		if (getVelocity().y == 0){
+			startTime = System.currentTimeMillis();
+		}
+		System.out.println("Y Velocity: " + getVelocity().y + " (" + (System.currentTimeMillis() - startTime) + ")");
+		*/
 	}
 	
 	public void updateTimers(){
@@ -258,7 +267,7 @@ public class PlayerEntity implements Entity{
 		return animationType;
 	}
 	
-	public boolean getInput(int key, boolean justPressed){
+	public boolean getInputPressed(int key, boolean justPressed){
 		if (!inputs.containsKey(key)){
 			return false;
 		}
@@ -279,11 +288,11 @@ public class PlayerEntity implements Entity{
 	}
 	
 	public void updatePhysics(float delta){
-		boolean right = getInput(Input.Keys.RIGHT, false);
-		boolean left = getInput(Input.Keys.LEFT, false);
-		boolean up = getInput(Input.Keys.UP, false);
-		boolean justUp = getInput(Input.Keys.UP, true);
-		boolean down = getInput(Input.Keys.DOWN, false);
+		boolean right = getInputPressed(Input.Keys.RIGHT, false);
+		boolean left = getInputPressed(Input.Keys.LEFT, false);
+		boolean up = getInputPressed(Input.Keys.UP, false);
+		boolean justUp = getInputPressed(Input.Keys.UP, true);
+		boolean down = getInputPressed(Input.Keys.DOWN, false);
 		walking = false;
 		
 		
@@ -320,9 +329,12 @@ public class PlayerEntity implements Entity{
 		if (Math.abs(getVelocity().x) > Constants.MAX_VELOCITY){
 			body.setLinearVelocity(Constants.MAX_VELOCITY * Math.signum(getVelocity().x), getVelocity().y);
 		}
-		
+		if (justUp && platformVelocity.y != 0){
+			int test = 0;
+		}
 		if (justUp && onGround() && Math.abs(body.getLinearVelocity().y - platformVelocity.y) < 1e-3 && jumpTimer <= 0){
 			jumpTimer = jumpDelay;
+			body.setLinearVelocity(body.getLinearVelocity().x, 0);
 			body.applyLinearImpulse(0, jumpImpulse * body.getMass(), body.getLocalCenter().x, body.getLocalCenter().x, true);
 		}
 		else if (!up && !onGround()){
@@ -473,5 +485,28 @@ public class PlayerEntity implements Entity{
 	@Override
 	public void setPlatform(MovingPlatform e) {
 		platform = e;
+	}
+	
+	@Override
+	public void setDestroyed(boolean d) {
+		// TODO Auto-generated method stub
+		destroyed = d;
+	}
+	@Override
+	public boolean getDestroyed() {
+		// TODO Auto-generated method stub
+		return destroyed;
+	}
+
+	@Override
+	public boolean platformValid() {
+		// TODO Auto-generated method stub
+		return (onGround() && jumpTimer <= 0 && Math.abs(body.getLinearVelocity().y - platformVelocity.y) < 1e-3 );
+	}
+
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
 	}
 }

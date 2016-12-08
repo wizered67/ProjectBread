@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -40,6 +41,16 @@ public class Constants {
 	
 	public static Vector2 toMeters(Vector2 pixelsVector){
 		return pixelsVector.cpy().scl(1f / PPM);
+	}
+	
+	public static void fixBleeding(TextureRegion region) {
+		float x = region.getRegionX();
+		float y = region.getRegionY();
+		float width = region.getRegionWidth();
+		float height = region.getRegionHeight();
+		float invTexWidth = 1f / region.getTexture().getWidth();
+		float invTexHeight = 1f / region.getTexture().getHeight();
+		region.setRegion((x + .5f) * invTexWidth, (y+.5f) * invTexHeight, (x + width - .5f) * invTexWidth, (y + height - .5f) * invTexHeight);       
 	}
 	
 }

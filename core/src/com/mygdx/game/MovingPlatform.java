@@ -10,10 +10,10 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 
 public class MovingPlatform extends GenericEntity {
-	private Vector2 moveDistance;
-	private Vector2 moveVelocity;
-	private Vector2 startPosition;
-	private ArrayList<Entity> onEntities;
+	protected Vector2 moveDistance;
+	protected Vector2 moveVelocity;
+	protected Vector2 startPosition;
+	protected ArrayList<Entity> onEntities;
 	Vector2 min = new Vector2(5000, 5000);
 	Vector2 max = new Vector2(0, 0);
 	public MovingPlatform(Body b, TextureRegion s, float bw, float bh, Vector2 md, Vector2 mv) {
@@ -21,7 +21,7 @@ public class MovingPlatform extends GenericEntity {
 		FixtureDef sensorFDef = new FixtureDef();
 		sensorFDef.isSensor = true;
 		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(bw / 2 - Constants.toMeters(0.5f), Constants.toMeters(0.5f), new Vector2(0, bh / 2), 0);
+		shape.setAsBox(bw / 2 - Constants.toMeters(0.1f), Constants.toMeters(0.1f), new Vector2(0, bh / 2), 0);
 		sensorFDef.filter.maskBits = Constants.MASK_SCENERY;
 		sensorFDef.filter.categoryBits = Constants.CATEGORY_SCENERY;
 		sensorFDef.shape = shape;
@@ -40,10 +40,7 @@ public class MovingPlatform extends GenericEntity {
 		return moveVelocity;
 	}
 	
-	@Override
-	public void update(float delta){
-		super.update(delta);
-		
+	public void updatePosition(float delta){
 		Vector2 moved = body.getPosition().cpy().sub(startPosition);
 		//System.out.println(moved);
 		if (Math.abs(moved.x) >= Math.abs(moveDistance.x)){
@@ -65,9 +62,16 @@ public class MovingPlatform extends GenericEntity {
 			float newV = moveVelocity.y;
 			body.setLinearVelocity(body.getLinearVelocity().x, newV);
 		}
-		
+	}
+	
+	public void updateEntities(){
+		ArrayList<Entity> destroyList = new ArrayList<Entity>();
 		for (Entity e : onEntities){
-			if (e.getBody().getPosition().y - e.getBoundingHeight() / 2 > (body.getPosition().y + boundingHeight / 2)){		
+			if (e.getDestroyed()){
+				destroyList.add(e);
+				continue;
+			}
+			if (entityOnPlatform(e)){		
 				e.setPlatformVelocity(body.getLinearVelocity().cpy());
 				e.setPlatform(this);
 			}
@@ -76,13 +80,20 @@ public class MovingPlatform extends GenericEntity {
 				e.setPlatform(null);
 			}
 		}
+		onEntities.removeAll(destroyList);
+	}
+	
+	
+	public boolean entityOnPlatform(Entity e){
+		return (e.getBody().getPosition().y - e.getBoundingHeight() / 2 > (body.getPosition().y + boundingHeight / 2));
+	}
+	
+	@Override
+	public void update(float delta){
+		super.update(delta);
+		updatePosition(delta);
+		updateEntities();
 		/*
-		else if (Math.abs(moved.x) + Math.abs(moveVelocity.x) > Math.abs(moveDistance.x)){
-			float newV = (Math.abs(moveDistance.x) - Math.abs(moved.x)) * Math.signum(body.getLinearVelocity().x);
-			body.setLinearVelocity(newV, body.getLinearVelocity().y);
-		
-		}
-		*/
 		if (body.getPosition().x < min.x){
 			min.x = body.getPosition().x;
 			System.out.println("Min: " + min);
@@ -99,7 +110,10 @@ public class MovingPlatform extends GenericEntity {
 			max.y = body.getPosition().y;
 			System.out.println("Max: " + max.cpy().sub(startPosition));
 		}
+		*/
 	}
+	
+	
 	
 	@Override
 	public void beginContact(ContactData c) {
@@ -111,7 +125,9 @@ public class MovingPlatform extends GenericEntity {
 				if (!onEntities.contains(otherEntity)){
 					onEntities.add(otherEntity);
 				}
+				
 			}
+			
 		}
 		
 	}

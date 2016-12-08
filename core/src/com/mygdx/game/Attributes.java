@@ -1,5 +1,5 @@
 package com.mygdx.game;
 
 public enum Attributes {
-	ONE_WAY;
+	ONE_WAY, FALLING;
 }

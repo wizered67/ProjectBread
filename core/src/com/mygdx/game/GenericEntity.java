@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -18,6 +19,7 @@ public class GenericEntity implements Entity{
 	protected int depth = 10;
 	protected Vector2 platformVelocity = new Vector2(0, 0);
 	protected MovingPlatform platform;
+	protected boolean destroyed = false;
 	public GenericEntity(Body b, TextureRegion s, float bw, float bh){
 		body = b;
 		sprite = s;
@@ -191,6 +193,32 @@ public class GenericEntity implements Entity{
 	public void setPlatform(MovingPlatform e) {
 		// TODO Auto-generated method stub
 		platform = e;
+	}
+	
+	public Rectangle getRect(){
+		float xp = body.getPosition().x;
+		float yp = body.getPosition().y;
+		return new Rectangle(xp - boundingWidth / 2, yp - boundingHeight / 2, boundingWidth, boundingHeight);
+	}
+	@Override
+	public void setDestroyed(boolean d) {
+		// TODO Auto-generated method stub
+		destroyed = d;
+	}
+	@Override
+	public boolean getDestroyed() {
+		// TODO Auto-generated method stub
+		return destroyed;
+	}
+	@Override
+	public boolean platformValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

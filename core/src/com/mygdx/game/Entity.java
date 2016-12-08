@@ -25,4 +25,8 @@ public interface Entity {
 	public Body getBody();
 	public void setPlatformVelocity(Vector2 v);
 	public void setPlatform(MovingPlatform b);
+	public void setDestroyed(boolean d);
+	public boolean getDestroyed();
+	public boolean platformValid();
+	public void destroy();
 }

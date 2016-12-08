@@ -24,6 +24,19 @@ public class MyInputProcessor implements InputProcessor {
     	player = p;
     }
     
+    public void update(){
+    	for (InputInfo input : keys.values()){
+    		if (input != null){
+    			input.justTouched = false;
+    		}
+    	}
+    	for (InputInfo input : touches.values()){
+    		if (input != null){
+    			input.justTouched = false;
+    		}
+    	}
+    }
+    
     @Override
 	public boolean keyDown(int keycode) {
     	//System.out.println("Pressed: " + keycode);
@@ -32,10 +45,7 @@ public class MyInputProcessor implements InputProcessor {
 			input.justTouched = true;
 			input.touched = true;
 			keys.put(keycode, input);
-		}
-		else{
-			keys.get(keycode).justTouched = false;
-			keys.get(keycode).touched = true;
+			//System.out.println("New Key");
 		}
 		player.setInput(keycode, keys.get(keycode));
 		return true;
@@ -67,9 +77,6 @@ public class MyInputProcessor implements InputProcessor {
             touch.touchY = screenY;
             if (!touch.touched){
             	touch.justTouched = true;
-            }
-            else{
-            	touch.justTouched = false;
             }
             touch.touched = true;
             
