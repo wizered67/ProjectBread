@@ -6,5 +6,4 @@ ProjectBread is a simple platformer game developed with [LibGDX] (https://libgdx
 
 ##Credits
 Adam Victor - programming and design
-
 Christine Nguyen - graphics
